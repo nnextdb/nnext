@@ -1,0 +1,219 @@
+/*
+ * Copyright NNext Co. and/or licensed to NNext Co.
+ * @author [Peter. Njenga]
+ *
+ * This file and its contents are licensed under the NNext License.
+ * Please see the included NOTICE for copyright information and
+ * LICENSE for a copy of the license.
+ */
+
+syntax = "proto3";
+//import "google/protobuf/any.proto";
+
+option java_multiple_files = true;
+option java_package = "ai.nnext.main";
+option java_outer_classname = "NNextMainProto";
+option objc_class_prefix = "NNext";
+
+package nnext;
+
+// The nnext service definition.
+service NNext {
+  rpc CreateIndex (Index) returns (Index) {}
+
+  rpc ListIndices (ListIndicesRequest) returns (ListIndicesResponse) {}
+
+  rpc DropIndex (Index) returns (Index) {}
+
+  rpc GetIndex (Index) returns (Index) {}
+
+  rpc VectorAdd (VectorAddRequest) returns (VectorAddResponse) {}
+
+  rpc VectorGet (VectorGetRequest) returns (VectorGetResponse) {}
+
+  rpc VectorSearch (VectorSearchRequest) returns (VectorSearchResponse) {}
+
+  rpc VectorDelete (VectorDeleteRequest) returns (VectorDeleteResponse) {}
+
+  rpc VectorClear (VectorClearRequest) returns (VectorClearResponse) {}
+
+}
+
+enum IndexType {
+  APPROXIMATED = 0;
+  EXACT = 1;
+}
+
+enum MetricType {
+  EUCLIDEAN = 0;
+  MANHATTAN = 1;
+  CHEBYSHEV = 2;
+}
+
+enum DataType {
+  unknown = 0;
+  double = 1;
+  float = 2;
+  int32 = 3;
+  string = 4;
+}
+
+message Metadata {
+  oneof metafield {
+    double	_double = 1;
+    float	_float = 2;
+    int32	_int32 = 3;
+    int64	_int64 = 4;
+    uint32	_uint32 = 5;
+    uint64	_uint64  = 6;
+    sint32	_sint32 = 7;
+    sint64	_sint64 = 8;
+    fixed32	_fixed32 = 9;
+    fixed64	_fixed64 = 10;
+    sfixed32	_sfixed32 = 11;
+    sfixed64	_sfixed64 = 12;
+    bool	_bool  = 13;
+    string	_string  = 14;
+    bytes	_bytes = 15;
+  }
+  string name = 16;
+  DataType type = 17;
+}
+
+message SchemaItem {
+  DataType type = 1;
+  bool is_primary = 2;
+  bool is_indexed = 3;
+  string name = 4;
+}
+
+message Schema {
+  map<string, SchemaItem> schema_map = 1;
+  repeated SchemaItem rptd__schema_item = 2;
+}
+
+message Datum {
+  string id = 1;
+  repeated float rptd__vector = 2;
+  repeated Metadata rptd__metadata = 3;
+}
+
+message DataList {
+  repeated float data = 1;
+}
+
+message Vector {
+  repeated float rptd__element = 1;
+}
+
+// Vector -> Useful for serializing and storing data in column-orientation.
+message VectorList {
+  repeated Vector rptd__vector = 1;
+}
+
+message Index {
+  string name = 1;
+  uint32 dims = 2;
+  optional IndexType index_type = 3;
+  optional MetricType metric = 4;
+  bool is_trained = 5;
+  uint64 ntotal = 6;
+  Schema schema = 7;
+}
+
+message IndexList {
+  repeated Index indices = 1;
+}
+
+message IndexMap {
+  map<string, Index> indices = 1;
+}
+
+message IdMap {
+  map<string, int64> idx = 1;
+  map<int64, string> inv = 2;
+}
+
+message CreateIndexRequest {
+  string name = 1;
+  int32 dims = 2;
+  IndexType index_type = 3;
+  MetricType metric_type = 4;
+  string schema = 5;
+}
+
+message CreateIndexResponse {
+  Index index = 1;
+}
+
+message ListIndicesRequest {
+  string pattern = 1;
+  uint32 offset = 2;
+  uint32 size = 3;
+  uint32 dims = 4;
+}
+
+message ListIndicesResponse {
+  repeated Index indices = 1;
+  uint32 total = 2;
+}
+
+message DropIndexRequest {
+  string name = 1;
+}
+
+message DropIndexResponse {
+  Index index = 1;
+}
+
+message VectorAddRequest {
+  string index_name = 1;
+  string header_cols = 2;
+  string header_types = 3;
+  repeated Datum data = 4;
+}
+
+message VectorAddResponse {
+  repeated Datum data = 1;
+  uint64 total = 2;
+}
+
+message VectorSearchRequest {
+  string index_name = 1;
+  repeated Vector rptd_query_vector = 2;
+  uint32 k = 3;
+  string filters = 4;
+  bool omit_vector = 5;
+  bool omit_metadata = 6;
+}
+
+message VectorSearchResponse {
+  string page = 1;
+  uint64 ntotal = 2;
+  repeated Datum rptd__datum = 3;
+}
+
+message VectorGetRequest {
+  repeated Datum data = 1;
+  string index_name = 2;
+}
+
+message VectorGetResponse {
+  repeated Datum data = 2;
+}
+
+message VectorDeleteRequest {
+  repeated Datum data = 1;
+}
+
+message VectorDeleteResponse {
+  repeated Datum data = 2;
+}
+
+message VectorClearRequest {
+  repeated Datum data = 1;
+}
+
+message VectorClearResponse {
+  repeated Datum data = 2;
+}
