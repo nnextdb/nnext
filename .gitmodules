@@ -1,0 +1,6 @@
+[submodule "third_party/faiss"]
+	path = third_party/faiss
+	url = https://github.com/facebookresearch/faiss.git
+[submodule "third_party/argparse"]
+	path = third_party/argparse
+	url = https://github.com/p-ranav/argparse.git

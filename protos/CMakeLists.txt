@@ -40,13 +40,11 @@ MESSAGE(STATUS, "gRPC install directory: ${gRPC_INSTALL_DIR}")
 SET(Protobuf_DIR "/home/peter/code/nnext/nnext/lib/extern/grpc/include/grpc/cmake/build/third_party/protobuf/lib/cmake/protobuf")
 
 FIND_PACKAGE(Protobuf CONFIG REQUIRED)
-message(STATUS "Using Protobuf_FOUND ${Protobuf_FOUND}")
-message(STATUS "Using Protobuf version ${Protobuf_VERSION}")
-message(STATUS "Using Protobuf libraries ${PROTOBUF_LIBRARIES}")
+
 
 SET(absl_DIR ${gRPC_INSTALL_DIR}/absl)
-#FIND_PACKAGE(absl CONFIG REQUIRED)
-#message(STATUS "Using absl version ${absl_VERSION}")
+FIND_PACKAGE(absl CONFIG REQUIRED)
+message(STATUS "Using absl version ${absl_VERSION}")
 
 SET(gRPC_DIR ${gRPC_INSTALL_DIR}/grpc)
 FIND_PACKAGE(gRPC CONFIG REQUIRED)
@@ -54,10 +52,16 @@ message(STATUS "Using gRPC version ${gRPC_VERSION}")
 
 SET(c-ares_DIR ${gRPC_INSTALL_DIR}/c-ares)
 FIND_PACKAGE(c-ares CONFIG REQUIRED)
-message(STATUS "Using gRPC version ${gRPC_VERSION}")
+message(STATUS "Using c-ares version ${c-ares_VERSION}")
 
 
 set(_GRPC_GRPCPP gRPC::grpc++)
+
+if (NOT DEFINED Protobuf_FOUND)
+    MESSAGE(FATAL_ERROR "You must set protobuf")
+else ()
+    MESSAGE(STATUS "Using protobuf version ${Protobuf_VERSION}")
+endif ()
 
 if (NOT DEFINED _PROTOBUF_PROTOC)
     MESSAGE(FATAL_ERROR "You must set _PROTOBUF_PROTOC variable")
@@ -92,7 +96,6 @@ message(STATUS, ${nnext_grpc_hdrs})
 message(STATUS, ${nnext_proto_srcs})
 message(STATUS, ${nnext_proto_hdrs})
 
-## rg_grpc_proto
 add_library(nnext_grpc_proto
         ${nnext_grpc_srcs}
         ${nnext_grpc_hdrs}
@@ -109,8 +112,3 @@ target_link_libraries(nnext_grpc_proto
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
         ${Protobuf_LIBRARY})
-
-#SET(PROTO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/protos)
-#file(GLOB PROTOBUF_FILELIST ${PROTO_INCLUDE_DIR}/*.proto)
-#message(STATUS "Compiling proto files ${PROTOBUF_FILELIST}")
-#protobuf_generate_python(PROTO_PY ${PROTOBUF_FILELIST})
