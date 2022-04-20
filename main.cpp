@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
       .nargs(0);
 
   opts.add_argument("--port", "-p")
-      .default_value(std::string("6900"))
+      .default_value(std::string("6040"))
       .help("Specifies the port for the server to listen to.");
 
   opts.add_argument("--host", "-h")
@@ -140,7 +140,6 @@ int main(int argc, char *argv[]) {
   default:
     spdlog::set_level(spdlog::level::err);
   }
-  std::cout << "Verbosity=" << verbosity << std::endl;
 
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   console_sink->set_level(spdlog::level::warn);
