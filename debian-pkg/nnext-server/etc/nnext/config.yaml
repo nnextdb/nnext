@@ -1,0 +1,5 @@
+hostname: localhost
+port: 6040
+data-dir: /var/lib/nnext/data
+log-level: INFO
+flat-index-cutoff: 10000
