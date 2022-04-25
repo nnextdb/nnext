@@ -204,3 +204,19 @@ sudo mkdir -p $NNEXT_DATA_DIR
 
 This usually results when the version of protoc used to build the .proto files is different from that used to build
 nnext. Ensure you are using the same version, preferably the one that resulted in the gRPC build step.
+
+### Adding third party dependencies.
+Adding a third party dependency involves using [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+To install submodule `module-dep`, add it into the `third_party` directory. Like so.
+```shell
+git submodule add --depth 1 https://github.com/repo/module-dep.git third_party/module-dep
+```
+NNext depends on the following submodules.
+```shell
+git submodule add --depth 1 https://github.com/facebookresearch/faiss.git third_party/faiss
+git submodule add --depth 1 https://github.com/grpc/grpc.git third_party/grpc
+git submodule add --depth 1 https://github.com/p-ranav/argparse.git third_party/argparse
+git submodule add --depth 1 https://github.com/gabime/spdlog.git third_party/spdlog
+git submodule add --depth 1 https://github.com/facebook/rocksdb third_party/rocksdb
+git submodule add --depth 1 https://github.com/fmtlib/fmt third_party/fmt
+```
