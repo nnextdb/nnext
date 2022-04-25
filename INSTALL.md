@@ -106,7 +106,24 @@ popd
 cd ..
 ```
 
-### Step 4: Build FAISS library
+### Step 4: Build RocksDB
+NNext uses RocksDB to persist data to disk.
+
+First, ensure that you are in the correct subdirectory. The rocksdb submodule should be located in the third_party
+directory `nnext/third_party`.
+```
+# nnext/third_party
+cd rocksdb
+```
+
+Compile librocksdb.a, RocksDB static library. Compiles static library in release mode.
+```shell
+make static_lib
+```
+
+Detailed instructions for [building rocksDB can be found here](https://github.com/facebook/rocksdb/blob/main/INSTALL.md).
+
+### Step 5: Build FAISS library
 NNext uses Faiss to manage the nearest neigbour indexes and perform the ANN computations.
 
 Detailed instructions on how to build faiss can be found on [it's install guide](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md).
@@ -160,7 +177,7 @@ The resulting`.so`file will be located in `faiss/libfaiss.so`
 
 If all goes according to plan, you should now be able to build NNext.
 
-### Step 4: Build NNext
+### Step 6: Build NNext
 Finally the step we've all be waiting for 🥁🥁. Build the nnext library!
 
 First, ensure you are in the `nnext` directory. Then run
