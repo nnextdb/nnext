@@ -89,8 +89,7 @@ nnclient = nnext.Client({
   'nodes': [{
     'host': 'localhost',
     'port': '6040'
-  }],
-  'connection_timeout_seconds': 2
+  }]
 })
 ```
 Broadly speaking, you can create two types of indices
@@ -98,7 +97,6 @@ Broadly speaking, you can create two types of indices
 ```python
 nnindex = client.index.create({
   "name": "movies_simple",
-  "index_type": "approximated",
   "dims": 768
 })
 ```

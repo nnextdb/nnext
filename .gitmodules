@@ -4,3 +4,15 @@
 [submodule "third_party/argparse"]
 	path = third_party/argparse
 	url = https://github.com/p-ranav/argparse.git
+[submodule "third_party/grpc"]
+	path = third_party/grpc
+	url = https://github.com/grpc/grpc.git
+[submodule "third_party/spdlog"]
+	path = third_party/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "third_party/rocksdb"]
+	path = third_party/rocksdb
+	url = https://github.com/facebook/rocksdb
+[submodule "third_party/fmt"]
+	path = third_party/fmt
+	url = https://github.com/fmtlib/fmt

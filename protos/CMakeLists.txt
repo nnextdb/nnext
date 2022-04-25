@@ -28,16 +28,16 @@ set(nnext_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/main.pb.h")
 set(nnext_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.cc")
 set(nnext_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.h")
 
-find_program(_GRPC_CPP_PLUGIN_EXECUTABLE "/home/peter/code/grpc-install/bin/grpc_cpp_plugin")
-find_program(_PROTOBUF_PROTOC "/home/peter/code/grpc-install/bin/protoc")
-set(_REFLECTION "/home/peter/code/grpc-install/lib/libgrpc++_reflection.a")
+find_program(_GRPC_CPP_PLUGIN_EXECUTABLE "$ENV{GRPC_INSTALL_DIR}/bin/grpc_cpp_plugin")
+find_program(_PROTOBUF_PROTOC "$ENV{GRPC_INSTALL_DIR}/bin/protoc")
+set(_REFLECTION "$ENV{GRPC_INSTALL_DIR}/lib/libgrpc++_reflection.a")
 
 # Find gRPC and absl.
-SET(gRPC_INSTALL_DIR //home/peter/code/grpc-install/lib/cmake)
+SET(gRPC_INSTALL_DIR $ENV{GRPC_INSTALL_DIR}/lib/cmake)
 MESSAGE(STATUS, "gRPC install directory: ${gRPC_INSTALL_DIR}")
 
 
-SET(Protobuf_DIR "/home/peter/code/nnext/nnext/lib/extern/grpc/include/grpc/cmake/build/third_party/protobuf/lib/cmake/protobuf")
+SET(Protobuf_DIR "third_party/grpc/cmake/build/third_party/protobuf/lib/cmake/protobuf")
 
 FIND_PACKAGE(Protobuf CONFIG REQUIRED)
 

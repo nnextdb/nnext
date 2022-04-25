@@ -13,6 +13,46 @@ _deps
 cmake-build-*
 
 # Code editor files
+#--------------------------------------
 .idea
 .clion.*
-/third_party
+
+# .cbp is the extension for a codeblocks solution file.
+*.cbp
+
+#C++-Related compile files.
+#--------------------------------------
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+#--------------------------------------

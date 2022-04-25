@@ -16,20 +16,25 @@ set(CMAKE_CXX_STANDARD 23)            # Enable c++23 standard
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
 SET(CMAKE_CXX_FLAGS "-g -Wall -Werror")
-#set(CMAKE_FIND_DEBUG_MODE TRUE)
 message(STATUS, "${CMAKE_CXX_FLAGS}")
 
 find_package(Git)
 
 add_subdirectory(protos)
 
+if (DEFINED ENV{GRPC_INSTALL_DIR})
+    MESSAGE(STATUS "Using gRPC install dir $ENV{GRPC_INSTALL_DIR}.")
+else ()
+    MESSAGE(FATAL_ERROR "ENV-VAR GRPC_INSTALL_DIR not specified")
+endif ()
+
 include_directories(
-        lib/extern/spdlog/include/spdlog/include
-        lib/extern/rocksdb/include/rocksdb/include
-        lib/extern/grpc/include/grpc-install/include
-        third_party/faiss
+        third_party/spdlog/include
+        third_party/rocksdb/include
+        third_party/faiss/include
         third_party/argparse/include
-        lib/extern/fmt/include/fmt-8.1.1/include
+        third_party/fmt/include
+        $ENV{GRPC_INSTALL_DIR}/include
 )
 
 # Add main.cpp file of project root directory as source file
@@ -37,12 +42,11 @@ set(SOURCE_FILES main.cpp server.h server.cpp util.h)
 
 # Add executable target with source files listed in SOURCE_FILES variable
 add_executable(nnext ${SOURCE_FILES})
-#add_subdirectory(lib/extern/rocksdb)
 
 
 ADD_LIBRARY(RocksDB STATIC IMPORTED)
 SET_TARGET_PROPERTIES(RocksDB PROPERTIES IMPORTED_LOCATION
-        "${CMAKE_CURRENT_LIST_DIR}/lib/extern/rocksdb/include/rocksdb/librocksdb.a")
+        "${CMAKE_CURRENT_LIST_DIR}/third_party/rocksdb/librocksdb.a")
 
 SET(faiss_DIR "${CMAKE_CURRENT_LIST_DIR}/third_party/faiss/build/faiss")
 message(STATUS "${faiss_DIR}")
