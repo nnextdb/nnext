@@ -56,3 +56,12 @@ cmake-build-*
 *.app
 
 #--------------------------------------
+
+*.swp
+
+*.deb
+*.deb.*
+
+/debian-pkg/nnext-*
+/debian-pkg/nnext/usr/bin/*
+/debian-pkg/nnext/logs/*
