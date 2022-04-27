@@ -25,8 +25,8 @@ For detailed installation instructions, please see the [Installation](INSTALL.md
   </tr>
   <tr>
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Logo-ubuntu_cof-orange-hex.svg/570px-Logo-ubuntu_cof-orange-hex.svg.png?20130511162351" width="50" /></td>
-    <td>Ubuntu</td>
-    <td>🚧 WIP 🚧<br>Install nnext on Ubuntu using <span style="color: yellowgreen">debian</span> package manager.</td>
+    <td>Debian <br> Ubuntu</td>
+    <td>Install NNext on Ubuntu using <span style="color: yellowgreen">debian</span> package manager.
   </tr>
   <tr>
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" width="50" /></td>
