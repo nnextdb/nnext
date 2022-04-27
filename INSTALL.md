@@ -48,12 +48,12 @@ the <a href="#Debian">Debian section below</a>.</td>
 ## Debian
 The Debian package for NNext v0.0.1 can be downloaded from the website and installed as follows:
 ```shell
-NNext_PKG=nnext-0.0.1-amd64.deb
-NNext_URL=https://trove.nnext.io/downloads
-wget $NNext_URL/$NNext_PKG
-wget $NNext_URL/$NNext_PKG.sha512
-shasum -a 512 -c $NNext_PKG.sha512 
-sudo dpkg -i $NNext_PKG
+NNEXT_PKG=nnext-0.0.1-amd64.deb
+NNEXT_URL=https://trove.nnext.io/downloads
+wget $NNEXT_URL/$NNEXT_PKG
+wget $NNEXT_URL/$NNEXT_PKG.sha512
+shasum -a 512 -c $NNEXT_PKG.sha512 
+sudo dpkg -i $NNEXT_PKG
 ```
 
 Run nnext
