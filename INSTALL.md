@@ -9,8 +9,9 @@
   </tr>
   <tr>
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Logo-ubuntu_cof-orange-hex.svg/570px-Logo-ubuntu_cof-orange-hex.svg.png?20130511162351" width="50" /></td>
-    <td>Ubuntu</td>
-    <td>🚧 WIP 🚧<br>Install nnext on Ubuntu using <span style="color: yellowgreen">debian</span> package manager.</td>
+    <td>Debian <br> Ubuntu</td>
+    <td>Install NNext on Ubuntu using <span style="color: yellowgreen">debian</span> package manager. Please see 
+the <a href="#Debian">Debian section below</a>.</td>
   </tr>
   <tr>
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" width="50" /></td>
@@ -44,4 +45,25 @@
   </tr>
  </table>
 
-## Quick Start
+## Debian
+The Debian package for NNext v0.0.1 can be downloaded from the website and installed as follows:
+```shell
+NNext_PKG=nnext-0.0.1-amd64.deb
+NNext_URL=https://trove.nnext.io/downloads
+wget $NNext_URL/$NNext_PKG
+wget $NNext_URL/$NNext_PKG.sha512
+shasum -a 512 -c $NNext_PKG.sha512 
+sudo dpkg -i $NNext_PKG
+```
+
+Run nnext
+```shell
+sudo nnext
+```
+
+You should see output like this
+```shell
+...
+...
+[2022-04-27 13:02:10.029] [info] 🏁 Started NNext at ▸ 127.0.0.1:6040
+```

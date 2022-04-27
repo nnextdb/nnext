@@ -25,7 +25,7 @@ stop_service_if_exists() {
 case "$1" in
     install)
         if grep -E "^nnext:" /etc/passwd > /dev/null ; then
-                echo "⚠️ nnext user already exist"
+                echo "⚠️  nnext user already exist"
         else
                 useradd -r -s /bin/sh -c "NNext Server" -M nnext
                 echo "create nnext user"

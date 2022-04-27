@@ -1,7 +1,10 @@
 Package: nnext-server
-Version: $VERSION
+Version: 0.0.1
 Maintainer: NNext, Co. <tech@nnext.ai>
-Description: NNext Server
+Description: NNext Server - A blazingly ⚡️ fast️ Nearest Neighbor vector search engine.
+  Reference documentation can be found at
+    https://nnext.ai/docs
 Homepage: https://nnext.ai
 Architecture: amd64
 Depends: curl
+License: Elastic-License
