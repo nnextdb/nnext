@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7...3.22)
+cmake_minimum_required(VERSION 3.7...3.23)
 
 #If CMake version is less than 3.12, the if block will be true, and the policy will be set to the current CMake version.
 # If CMake is 3.12 or higher, the if block will be false, but the new syntax in cmake_minimum_required will be
@@ -7,9 +7,9 @@ if (${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif ()
 
-project(NNext_Proto C CXX)
+project(NNext_proto C CXX)
 
-message(DEBUG, "Module ${PROJECT_NAME}")
+message(DEBUG, "In module ${PROJECT_NAME}")
 
 set(CMAKE_CXX_STANDARD 23)            # Enable c++23 standard
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -27,6 +27,12 @@ set(nnext_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/main.pb.cc")
 set(nnext_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/main.pb.h")
 set(nnext_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.cc")
 set(nnext_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.h")
+
+if (DEFINED ENV{GRPC_INSTALL_DIR})
+    MESSAGE(STATUS "Using gRPC install dir [env-var GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIR}")
+else ()
+    MESSAGE(FATAL_ERROR "GRPC_INSTALL_DIR env-var not specified")
+endif ()
 
 find_program(_GRPC_CPP_PLUGIN_EXECUTABLE "$ENV{GRPC_INSTALL_DIR}/bin/grpc_cpp_plugin")
 find_program(_PROTOBUF_PROTOC "$ENV{GRPC_INSTALL_DIR}/bin/protoc")

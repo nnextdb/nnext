@@ -24,7 +24,7 @@
 #include <faiss/IndexHNSW.h>
 #include <faiss/IndexNNDescent.h>
 #include <faiss/MetricType.h>
-#include <fmt/core.h>
+#include <spdlog/fmt/fmt.h>
 #include <google/protobuf/map.h>
 #include <grpcpp/grpcpp.h>
 #include <rocksdb/db.h>

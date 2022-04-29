@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7...3.22)
+cmake_minimum_required(VERSION 3.7...3.23)
 
 #If CMake version is less than 3.12, the if block will be true, and the policy will be set to the current CMake version.
 # If CMake is 3.12 or higher, the if block will be false, but the new syntax in cmake_minimum_required will be
@@ -7,7 +7,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(nnext VERSION 0.0.1
+project(nnext VERSION 0.0.7
         DESCRIPTION "NNext - A blazingly fast ⚡️ open-source NN vector search engine."
         HOMEPAGE_URL "https://nnext.ai"
         LANGUAGES CXX)
@@ -23,17 +23,16 @@ find_package(Git)
 add_subdirectory(protos)
 
 if (DEFINED ENV{GRPC_INSTALL_DIR})
-    MESSAGE(STATUS "Using gRPC install dir $ENV{GRPC_INSTALL_DIR}.")
+    MESSAGE(STATUS "Using gRPC install dir [env-var GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIRX}.")
 else ()
-    MESSAGE(FATAL_ERROR "ENV-VAR GRPC_INSTALL_DIR not specified")
+    MESSAGE(FATAL_ERROR "GRPC_INSTALL_DIR env-var not specified")
 endif ()
 
 include_directories(
         third_party/spdlog/include
         third_party/rocksdb/include
-        third_party/faiss/include
+        third_party/faiss
         third_party/argparse/include
-        third_party/fmt/include
         $ENV{GRPC_INSTALL_DIR}/include
 )
 

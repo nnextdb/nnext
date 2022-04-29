@@ -62,7 +62,7 @@ Choose a directory to hold locally installed packages. This page assumes that
 the environment variable `GRPC_INSTALL_DIR` holds this directory path. For example:
 
 ```shell
-export GRPC_INSTALL_DIR=$HOME/.local/grpc
+export GRPC_INSTALL_DIR=/usr/local/grpc
 ```
 
 Ensure that the directory exists:

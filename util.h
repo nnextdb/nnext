@@ -13,7 +13,7 @@
 
 #include <regex>
 #include <exception>
-#include <fmt/core.h>
+#include <spdlog/fmt/fmt.h>
 
 
 const nnext::Schema parse_index_schema(const nnext::Schema &schema) {
