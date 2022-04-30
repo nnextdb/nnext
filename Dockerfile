@@ -2,9 +2,9 @@ FROM ubuntu:20.04
 
 RUN apt-get update
 
-RUN apt-get install wget curl libdigest-sha-perl -y
+RUN apt-get install wget curl libdigest-sha-perl binutils -y
 
-ARG NNEXT_PKG=nnext-0.0.6-amd64.deb
+ARG NNEXT_PKG=nnext-0.0.11-amd64.deb
 ARG NNEXT_URL=https://trove.nnext.io/downloads
 
 RUN wget --quiet $NNEXT_URL/$NNEXT_PKG

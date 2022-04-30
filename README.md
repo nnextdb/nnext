@@ -8,7 +8,7 @@ NNext is a
 * 📖 source-available [[Elastic License 2.0]](https://www.elastic.co/licensing/elastic-license)
 * 🔍 nearest-neighbors vector search engine
 
-<a href="https://discord.gg/vBPpJkS"><img src="https://img.shields.io/badge/chat-slack-orange.svg?logo=slack&style=flat"></a>
+<a href="https://tiny.one/nnext-slk-comm-gh"><img src="https://img.shields.io/badge/chat-slack-orange.svg?logo=slack&style=flat"></a>
 <a href="https://twitter.com/intent/follow?screen_name=nnextai"><img src="https://img.shields.io/badge/Follow-nnextai-blue.svg?style=flat&logo=twitter"></a>
 
 [Installation](#installation) | [Contributing](#contributing) |  [Getting Started](#getting-started) | [Connecting 

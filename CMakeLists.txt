@@ -7,7 +7,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(nnext VERSION 0.0.7
+project(nnext VERSION 0.0.11
         DESCRIPTION "NNext - A blazingly fast ⚡️ open-source NN vector search engine."
         HOMEPAGE_URL "https://nnext.ai"
         LANGUAGES CXX)
@@ -16,7 +16,26 @@ set(CMAKE_CXX_STANDARD 23)            # Enable c++23 standard
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
 SET(CMAKE_CXX_FLAGS "-g -Wall -Werror")
-message(STATUS, "${CMAKE_CXX_FLAGS}")
+
+# RPATH Settings
+# https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+# -----------------------------------------------------------------------
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "/lib/nnext/x86_64-linux-gnu")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# -----------------------------------------------------------------------
+
+message(DEBUG, "cxx flags ${CMAKE_CXX_FLAGS}")
+message(DEBUG, "linker flags ${CMAKE_EXE_LINKER_FLAGS}")
 
 find_package(Git)
 
@@ -61,7 +80,10 @@ else ()
 endif ()
 
 FIND_PACKAGE(Threads REQUIRED)
-FIND_PACKAGE(ZLIB)
+FIND_PACKAGE(ZLIB REQUIRED)
+FIND_PACKAGE(BZip2 REQUIRED)
+find_library(/usr/lib/x86_64-linux-gnu/ lz4)
+find_library(/usr/lib/x86_64-linux-gnu/ zstd)
 
 FIND_PACKAGE(OpenMP)
 if (NOT DEFINED OpenMP_CXX_FOUND)
@@ -73,6 +95,7 @@ endif ()
 TARGET_LINK_LIBRARIES(nnext ${CMAKE_DL_LIBS} nnext_grpc_proto
         ${faiss_LIB}
         RocksDB
-        OpenMP::OpenMP_CXX ZLIB::ZLIB
+        OpenMP::OpenMP_CXX
+        ZLIB::ZLIB BZip2::BZip2 lz4 zstd
         Threads::Threads)
 

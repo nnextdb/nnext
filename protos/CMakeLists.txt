@@ -29,7 +29,7 @@ set(nnext_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.cc")
 set(nnext_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/main.grpc.pb.h")
 
 if (DEFINED ENV{GRPC_INSTALL_DIR})
-    MESSAGE(STATUS "Using gRPC install dir [env-var GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIR}")
+    MESSAGE(STATUS "Using gRPC install dir [ENV GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIR}")
 else ()
     MESSAGE(FATAL_ERROR "GRPC_INSTALL_DIR env-var not specified")
 endif ()
@@ -38,25 +38,24 @@ find_program(_GRPC_CPP_PLUGIN_EXECUTABLE "$ENV{GRPC_INSTALL_DIR}/bin/grpc_cpp_pl
 find_program(_PROTOBUF_PROTOC "$ENV{GRPC_INSTALL_DIR}/bin/protoc")
 set(_REFLECTION "$ENV{GRPC_INSTALL_DIR}/lib/libgrpc++_reflection.a")
 
-# Find gRPC and absl.
-SET(gRPC_INSTALL_DIR $ENV{GRPC_INSTALL_DIR}/lib/cmake)
-MESSAGE(STATUS, "gRPC install directory: ${gRPC_INSTALL_DIR}")
+# Set gRPC_MODULES_DIR to find cmake files.
+SET(gRPC_MODULES_DIR $ENV{GRPC_INSTALL_DIR}/lib/cmake)
+MESSAGE(STATUS, "gRPC install directory: ${gRPC_MODULES_DIR}")
 
-
-SET(Protobuf_DIR "third_party/grpc/cmake/build/third_party/protobuf/lib/cmake/protobuf")
-
+# Find Protobuf. Required by gRPC.
+SET(Protobuf_DIR ${gRPC_MODULES_DIR}/protobuf)
 FIND_PACKAGE(Protobuf CONFIG REQUIRED)
 
-
-SET(absl_DIR ${gRPC_INSTALL_DIR}/absl)
+# Find gRPC and absl.
+SET(absl_DIR ${gRPC_MODULES_DIR}/absl)
 FIND_PACKAGE(absl CONFIG REQUIRED)
 message(STATUS "Using absl version ${absl_VERSION}")
 
-SET(gRPC_DIR ${gRPC_INSTALL_DIR}/grpc)
+SET(gRPC_DIR ${gRPC_MODULES_DIR}/grpc)
 FIND_PACKAGE(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC version ${gRPC_VERSION}")
 
-SET(c-ares_DIR ${gRPC_INSTALL_DIR}/c-ares)
+SET(c-ares_DIR ${gRPC_MODULES_DIR}/c-ares)
 FIND_PACKAGE(c-ares CONFIG REQUIRED)
 message(STATUS "Using c-ares version ${c-ares_VERSION}")
 
