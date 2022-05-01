@@ -19,6 +19,12 @@ For detailed installation instructions, please see the [Installation](INSTALL.md
 #### Nnext is supported on
 <table>
   <tr>
+    <td><img src="https://www.docker.com/wp-content/uploads/2022/03/vertical-logo-monochromatic.png" width="50" /></td>
+    <td>Docker</td>
+    <td>By far the easiest way to get up and running assuming you have docker installed. <br>Pull the <span style="color: 
+deepskyblue">nnext:latest</span> image from docker hub.</td>
+  </tr>
+  <tr>
     <td><img src="https://s3.us-east-2.amazonaws.com/assets.nnext.io/img/build.png" width="50" /></td>
     <td>Build from Source</td>
     <td>Build and install nnext from source using cmake & gcc/g++. Please follow the <a href="/COMPILATION.md">Compilation guide</a>.</td>
@@ -32,11 +38,6 @@ For detailed installation instructions, please see the [Installation](INSTALL.md
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" width="50" /></td>
     <td>MacOS</td>
     <td>🚧 WIP 🚧<br>Install via <span style="color: yellowgreen">homebrew</span></td>
-  </tr>
-  <tr>
-    <td><img src="https://www.docker.com/wp-content/uploads/2022/03/vertical-logo-monochromatic.png" width="50" /></td>
-    <td>Docker</td>
-    <td>🚧 WIP 🚧<br>Get the image <span style="color: yellowgreen">nnext:latest</span> image from docker hub</td>
   </tr>
   <tr>
     <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Kubernetes_logo_without_workmark.svg/1234px-Kubernetes_logo_without_workmark.svg.png" width="50" /></td>
@@ -64,20 +65,10 @@ For detailed installation instructions, please see the [Installation](INSTALL.md
 
 Here's a quick example showcasing how you can create an index, insert vectors/documents and search it on NNext.
 
-Let's begin by installing the NNext server.
+Let's begin by installing the NNext server using docker.
 
 ```shell
-NNEXT_PKG=nnext-0.0.1-amd64.deb
-NNEXT_URL=https://trove.nnext.io/downloads
-wget $NNEXT_URL/$NNEXT_PKG
-wget $NNEXT_URL/$NNEXT_PKG.sha512
-shasum -a 512 -c $NNEXT_PKG.sha512
-sudo dpkg -i $NNEXT_PKG
-```
-
-Run nnext
-```shell
-sudo nnext
+docker run -p 6040:6040 -v/tmp/nnext/data:/data nnext/nnext:latest --data-dir /data
 ```
 
 You should see output like this
@@ -100,31 +91,39 @@ import nnext
 import numpy as np
 from nnext import _and, _eq, _gte, _in
 
-nnclient = nnext.Client({
-  'nodes': [{
-    'host': 'localhost',
-    'port': '6040'
-  }]
-})
-```
-Create an index
-```python
-dims = 768
-nnindex = client.index.create({
-  "name": "movies_simple",
-  "dims": dims
-})
+# Create and initialize the vector client
+nnclient = nnext.Client(
+    nodes=[
+    {'host': 'localhost', 'port': '6040'}
+  ])
 ```
 
-Add vectors to the index.
+Broadly speaking, you can create two types of indices
+### 1. Simple indices
 ```python
-data = np.random.rand(100, dims)
-add_res = nnindex.add(query)
-```
-Search the vectors. Get the nearest 7 vectors for each query vector.
-```python
-query = np.random.rand(5,dims)
-sch_res = idx.search(query, k=7)
+n_dim = 768
+
+# Create an vector index.
+nnindex = nnclient.index.create(
+    d=n_dim,
+    name='test_ANN')
+
+n_vecs = 1000
+k = 5
+n_queries = 10
+vectors = np.random.rand(n_vecs, n_dim)
+
+# Insert vectors into the index.
+nnindex.add(vectors)
+
+# Create a query vector set.
+q_vectors = np.random.rand(n_queries, n_dim)
+
+# Now search the vectors.
+_idx, _res = nnindex.search(q_vectors, k)  # search
+
+# The search operation returns a tuple of vectors and optionally the data
+# associated with the vectors.
 ```
 
 ## Documentation

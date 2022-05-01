@@ -64,12 +64,13 @@ void NNextServiceImpl::_init() {
   // Read from rocks DB.
   db_status = _rocksdb->Get(rocksdb::ReadOptions(), "indices", &value);
 
-  if (!db_status.ok())
-    spdlog::error("RocksDB error: {}", db_status.ToString());
-
-  p__index_list_pb->ParseFromString(value);
-  spdlog::info("Loaded {} indices from disk.",
-               p__index_list_pb->indices_size());
+  if (!db_status.ok()) {
+    spdlog::info("Empty data directory found. {}");
+  } else {
+    p__index_list_pb->ParseFromString(value);
+    spdlog::info("Loaded {} indices from disk.",
+                 p__index_list_pb->indices_size());
+  }
 
   std::string vector_list_key;
 

@@ -7,7 +7,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(nnext VERSION 0.0.11
+project(nnext VERSION 0.0.12
         DESCRIPTION "NNext - A blazingly fast ⚡️ open-source NN vector search engine."
         HOMEPAGE_URL "https://nnext.ai"
         LANGUAGES CXX)
@@ -20,19 +20,26 @@ SET(CMAKE_CXX_FLAGS "-g -Wall -Werror")
 # RPATH Settings
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 # -----------------------------------------------------------------------
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
 
-# when building, don't use the install RPATH already
-# (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+# Without --enable-new-dtags, you'll just set the RPATH flag, which is probably not what you want. With
+# --enable-new-dtags, you'll set both RPATH and RUNPATH to the same value.
+SET(CMAKE_EXE_LINKER_FLAGS  "-Wl,--enable-new-dtags")
 
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "/lib/nnext/x86_64-linux-gnu")
+# Runpaths to search for shared libraries.
+set(RUNPATHS
+        /usr/lib/nnext/third_party
+        /usr/lib/nnext/x86_64-linux-gnu
+        /usr/lib/nnext/intel_mkl
+        $ORIGIN/third_party/faiss/build/faiss)
+string(JOIN : RUNPATHS ${RUNPATHS})
 
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# -----------------------------------------------------------------------
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS},-rpath,${RUNPATHS}")
+
+
+# Skip the full RPATH for the build tree. RPATHs will be hardcoded into the nnext
+# executable which results in developer's directories being set in the RUNPATH
+# unnecessarily.
+SET(CMAKE_SKIP_BUILD_RPATH TRUE)
 
 message(DEBUG, "cxx flags ${CMAKE_CXX_FLAGS}")
 message(DEBUG, "linker flags ${CMAKE_EXE_LINKER_FLAGS}")
@@ -66,24 +73,21 @@ ADD_LIBRARY(RocksDB STATIC IMPORTED)
 SET_TARGET_PROPERTIES(RocksDB PROPERTIES IMPORTED_LOCATION
         "${CMAKE_CURRENT_LIST_DIR}/third_party/rocksdb/librocksdb.a")
 
-SET(faiss_DIR "${CMAKE_CURRENT_LIST_DIR}/third_party/faiss/build/faiss")
-message(STATUS "${faiss_DIR}")
+# Here is the important line:
+find_library(lz4_LIB lz4 REQUIRED)
+find_library(zstd_LIB zstd REQUIRED)
 
-find_library(faiss_LIB
-        NAMES faiss libfaiss
-        HINTS "${faiss_DIR}")
-
-if (NOT faiss_LIB)
-    MESSAGE(FATAL_ERROR "faiss lib not found.")
-else ()
-    MESSAGE(STATUS "Using faiss lib ${faiss_LIB}")
-endif ()
+# During build, find and link to faiss in the third_party directory. During
+# installation using debian-package manager, copy the location of libfaiss.so
+# to /usr/lib/nnext/x86_64-linux-gnu/third_party and link to it.
+set(faiss_BUILD_PATH "${CMAKE_CURRENT_LIST_DIR}/third_party/faiss/build/faiss")
+find_library(faiss_LIB faiss
+        HINTS ${faiss_BUILD_PATH}
+        REQUIRED)
 
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(BZip2 REQUIRED)
-find_library(/usr/lib/x86_64-linux-gnu/ lz4)
-find_library(/usr/lib/x86_64-linux-gnu/ zstd)
 
 FIND_PACKAGE(OpenMP)
 if (NOT DEFINED OpenMP_CXX_FOUND)
@@ -96,6 +100,9 @@ TARGET_LINK_LIBRARIES(nnext ${CMAKE_DL_LIBS} nnext_grpc_proto
         ${faiss_LIB}
         RocksDB
         OpenMP::OpenMP_CXX
-        ZLIB::ZLIB BZip2::BZip2 lz4 zstd
+        ZLIB::ZLIB
+        BZip2::BZip2
+        lz4
+        zstd
         Threads::Threads)
 

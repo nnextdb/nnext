@@ -1,10 +1,14 @@
-VERSION=0.0.11
+VERSION=0.0.19
 
 set -ex
 
 rm -rf nnext-*
 
+cp ../nnext nnext/usr/bin
+
 cp -r nnext nnext-$VERSION-amd64
+
+#sed 's/$VERSION/$VERSION/g' nnext/DEBIAN/control
 
 NNEXT_SRC_DIR=nnext-$VERSION-amd64
 NNEXT_DEB=$NNEXT_SRC_DIR.deb
