@@ -30,7 +30,8 @@ set(RUNPATHS
         /usr/lib/nnext/third_party
         /usr/lib/nnext/x86_64-linux-gnu
         /usr/lib/nnext/intel_mkl
-        $ORIGIN/third_party/faiss/build/faiss)
+        $ORIGIN/third_party/faiss/build/faiss
+        ${CMAKE_CURRENT_LIST_DIR}/third_party/faiss/build/faiss)
 string(JOIN : RUNPATHS ${RUNPATHS})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS},-rpath,${RUNPATHS}")
@@ -49,7 +50,7 @@ find_package(Git)
 add_subdirectory(protos)
 
 if (DEFINED ENV{GRPC_INSTALL_DIR})
-    MESSAGE(STATUS "Using gRPC install dir [env-var GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIRX}.")
+    MESSAGE(STATUS "Using gRPC install dir [env-var GRPC_INSTALL_DIR]  $ENV{GRPC_INSTALL_DIR}.")
 else ()
     MESSAGE(FATAL_ERROR "GRPC_INSTALL_DIR env-var not specified")
 endif ()

@@ -53,7 +53,7 @@ void RunServer(argparse::ArgumentParser &opts) {
       spdlog::critical("RocksDB error {}", db_status.ToString());
       exit(1);
     } else {
-      spdlog::debug("Connected to RockdDB. Data directory {}", data_dir);
+      spdlog::debug("Connected to RocksdDB. Data directory {}", data_dir);
     }
 
     /*
@@ -151,13 +151,7 @@ int main(int argc, char *argv[]) {
   spdlog::logger logger("multi_sink", {console_sink, file_sink});
   logger.set_level(spdlog::level::debug);
 
-
-
-//  logger.warn("this should appear in both console and file");
-//  logger.info(
-//      "this message should not appear in the console, only in the file");
-
-  logger::info("\nATTENTION: NNext.ai collects completely anonymous telemetry "
+  logger.info("\nATTENTION: NNext.ai collects completely anonymous telemetry "
                "regarding usage."
                "\nThis information is used to shape NNext.ai' roadmap and "
                "prioritize features."
