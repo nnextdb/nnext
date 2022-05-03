@@ -27,7 +27,7 @@ ARG BASE_COMMIT_HASH
 ARG GIT_SOURCE_URL
 
 # TODO: Possibly use a PAT for github/git host
-RUN git clone --recurse-submodules --depth 1 --shallow-submodules ${GIT_SOURCE_URL}
+RUN git clone --recurse-submodules --shallow-submodules ${GIT_SOURCE_URL}
 WORKDIR /nnext
 RUN git -c advice.detachedHead=false checkout ${BASE_COMMIT_HASH}
 
@@ -77,6 +77,7 @@ CMD ./nnext --data-dir ${NNEXT_DATA_DIR} --verbose --port 6040 --host 0.0.0.0
 
 # Build with (e.g.):
 # docker build -f DevDockerfile --build-arg BASE_COMMIT_HASH=COMMIT_OF_INTEREST  --build-arg GIT_SOURCE_URL=GITHUB_URL_FOR_YOUR_FORK .
+# Here COMMIT_OF_INTEREST should be a commit that exists on the remote and has submodule references up to date with the source being referenced.
 
 # Run with:
 # docker run -p 6040:6040 IMAGE_ID
