@@ -57,15 +57,16 @@ void NNextServiceImpl::_init() {
   rocksdb::Status db_status;
 
   if (p__index_list_pb == nullptr) {
-    spdlog::warn("Null pointer passed. Initializing.");
+    spdlog::warn("Null pointer passed; no existing DB index on file. Initializing a new IndexList.");
     p__index_list_pb = std::make_shared<nnext::IndexList>();
   }
 
-  // Read from rocks DB.
-  db_status = _rocksdb->Get(rocksdb::ReadOptions(), "indices", &value);
+  // Attempt read of previously recorded key from rocks DB.
+  std::string sample_key = "indices";
+  db_status = _rocksdb->Get(rocksdb::ReadOptions(), sample_key, &value);
 
   if (!db_status.ok()) {
-    spdlog::info("Empty data directory found. {}");
+    spdlog::info("RocksDB tried to read from key '{}', but encountered error: {}", sample_key, db_status.ToString());
   } else {
     p__index_list_pb->ParseFromString(value);
     spdlog::info("Loaded {} indices from disk.",
