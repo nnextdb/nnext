@@ -1,0 +1,82 @@
+
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+
+RUN apt-get install -y build-essential autoconf libtool pkg-config libz-dev wget gpg git liblz4-dev libzstd-dev libbz2-dev
+
+# Install recent cmake via kitware apt repo
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
+    | gpg --dearmor - \
+    | tee /usr/share/keyrings/kitware-archive-keyring.gpg \
+    >/dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' \
+    | tee /etc/apt/sources.list.d/kitware.list \
+    >/dev/null && \
+    apt-get update && \
+    rm /usr/share/keyrings/kitware-archive-keyring.gpg && \
+    apt-get install kitware-archive-keyring && \
+    apt-get install -y cmake
+
+# Clone nnext source from official repo or fork, and checkout a base commit of interest.
+# For dev purposes all that really matters for this commit is that this copy has submodule references 
+# that are up to date with the source being developed.
+ARG BASE_COMMIT_HASH
+ARG GIT_SOURCE_URL
+
+# TODO: Possibly use a PAT for github/git host
+RUN git clone --recurse-submodules --depth 1 --shallow-submodules ${GIT_SOURCE_URL}
+WORKDIR /nnext
+RUN git -c advice.detachedHead=false checkout ${BASE_COMMIT_HASH}
+
+
+# Build and install gRPC
+ENV GRPC_INSTALL_DIR=/home/.local/grpc
+RUN mkdir -p ${GRPC_INSTALL_DIR}
+ENV PATH="${GRPC_INSTALL_DIR}/bin:$PATH"
+RUN cd third_party/grpc && \
+    mkdir -p cmake/build && \
+    cd cmake/build && \
+    cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=${GRPC_INSTALL_DIR} ../.. && \
+    make -j4 && \
+    make install && \
+    cd ../.. && \
+    cd ..
+
+# Build RocksDB
+RUN cd third_party/rocksdb && make static_lib
+
+# Build FAISS
+RUN apt-get install -y intel-mkl
+RUN cd third_party/faiss && \
+    cmake -B build . \
+    -DFAISS_ENABLE_GPU=OFF \
+    -DFAISS_ENABLE_PYTHON=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_BUILD_TYPE=Release && \
+    make -C build -j4 faiss
+
+# Copy most recent source files
+WORKDIR /
+COPY . /nnext
+WORKDIR /nnext
+
+
+# Build nnext
+RUN cmake . && \
+    make -C . -j4
+
+# Run nnext
+ENV NNEXT_DATA_DIR=/var/lib/nnext/data
+RUN mkdir -p ${NNEXT_DATA_DIR}
+CMD ./nnext --data-dir ${NNEXT_DATA_DIR} --verbose --port 6040 --host 0.0.0.0
+
+
+# Build with (e.g.):
+# docker build -f DevDockerfile --build-arg BASE_COMMIT_HASH=COMMIT_OF_INTEREST  --build-arg GIT_SOURCE_URL=GITHUB_URL_FOR_YOUR_FORK .
+
+# Run with:
+# docker run -p 6040:6040 IMAGE_ID
