@@ -16,6 +16,7 @@ cmake-build-*
 #--------------------------------------
 .idea
 .clion.*
+.vscode
 
 # .cbp is the extension for a codeblocks solution file.
 *.cbp
