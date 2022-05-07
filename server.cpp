@@ -37,6 +37,8 @@
 
 using nnext::NNext;
 using namespace std;
+
+#define INDEX_SIZE_THRESHOLD 5000
 /*
  * TODO Move to utils.
  */
@@ -48,7 +50,7 @@ using namespace std;
 void NNextServiceImpl::_init() {
   /** Read the indices persisted to disk and return them.
    *
-   * Use an open RockDB connection to read from Disk serialized index
+   * Use an open RocksDB connection to read from Disk serialized index
    * parameters.
    *
    * @param rocksdb: Connected RocksDB instance.
@@ -61,8 +63,8 @@ void NNextServiceImpl::_init() {
     p__index_list_pb = std::make_shared<nnext::IndexList>();
   }
 
-  // Attempt read of previously recorded key from rocks DB.
-  std::string sample_key = "indices";
+  // Attempt read of previously recorded index list key from rocks DB.
+  std::string sample_key = "sample_indexlist_key";
   db_status = _rocksdb->Get(rocksdb::ReadOptions(), sample_key, &value);
 
   if (!db_status.ok()) {
@@ -102,7 +104,7 @@ void NNextServiceImpl::_init() {
      * Deserialize the vectors using gRPC protobufs.
      * Serialization/deserialization is a tricky operation that has lots of
      * edge-case depending on the system (OS, architecture, mood of the gods
-     * e.t.c). Use gRPC it to handle the nitty gritty.
+     * e.t.c). Use gRPC to handle the nitty gritty.
      */
     pb__vector_list->ParseFromString(value);
     spdlog::debug("Loaded vectors from disk [index.name={} nvectors={}]",
@@ -565,7 +567,6 @@ NNextServiceImpl::VectorAdd(grpc::ServerContext *p_context,
     spdlog::debug("Adding to index IndexHNSW [data_vec.size()={}]",
                   data_vec.size());
     curr_index->add(n, &data_vec[0]);
-
   } else {
     spdlog::debug("Adding to index IndexFLAT [data_vec.size()={}]",
                   data_vec.size());
@@ -601,6 +602,9 @@ NNextServiceImpl::VectorGet(grpc::ServerContext *p_context,
     spdlog::error(log_msg);
     return grpc::Status(grpc::StatusCode::NOT_FOUND, log_msg);
   }
+
+  // TODO: Implement VectorGet
+
   //
   //  auto index = index_map->at(index_name);
   //  int n = data.size();
@@ -660,9 +664,12 @@ NNextServiceImpl::VectorSearch(grpc::ServerContext *p_context,
   const auto query_vectors = p_request->rptd_query_vector();
   const int n = query_vectors.size();
   const faiss::Index::idx_t k = p_request->k();
+  int d = curr_index->d;
+  int ntotal = curr_quantizer->ntotal;
   std::vector<float> data_vec;
   std::vector<faiss::Index::idx_t> labels(k * n);
   std::vector<float> distances(k * n);
+  std::vector<float> recons(k * n * d);
   rocksdb::Status db_status;
 
   /*
@@ -674,11 +681,11 @@ NNextServiceImpl::VectorSearch(grpc::ServerContext *p_context,
     /*
      * Check that the dimensions match. Return error if not.
      */
-    if (curr_index->d != vector.size()) {
+    if (d != vector.size()) {
       log_msg =
           fmt::format("❗️ Query vector size does not match index dims. "
                       "[index.dims={} query.dims={}]",
-                      curr_index->d, vector.size());
+                      d, vector.size());
       spdlog::error(log_msg);
       return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, log_msg);
     }
@@ -699,9 +706,53 @@ NNextServiceImpl::VectorSearch(grpc::ServerContext *p_context,
                         curr_quantizer->ntotal, curr_index->ntotal);
   spdlog::info(log_msg);
 
-  if (curr_quantizer->ntotal < 5000) {
-    curr_quantizer->search(n, &data_vec[0], k, &distances[0], &labels[0]);
+  if (ntotal < INDEX_SIZE_THRESHOLD) {
+
+    if (!p_request->omit_vector()) {
+      curr_quantizer->search_and_reconstruct(n, &data_vec[0], k, &distances[0], &labels[0], &recons[0]);
+
+      log_msg = fmt::format("Reconstructing vectors.");
+      spdlog::info(log_msg);
+
+      // Set nearest neighbor indices and vectors on response datum
+      for (size_t i = 0; i < (unsigned int)k * n; i++) {
+        auto datum = p_response->add_rptd__datum();
+
+        std::string _id = fmt::format("{}", labels[i]);
+        datum->set_id(_id);
+        // TODO: Look into fastest copy operation to use here.
+        for (int j = 0; j < d; j++) {
+          datum->add_rptd__vector((float)recons[i * d + j]);
+        }
+      }
+    }
+
+    // TODO: Conditional logic here needs to change to reflect the 2^2 possible combinations of
+    // omit_metadata and omit_vector cases.
+    // Ignoring this for now since the handler is not implemented anyway.
+    if (!p_request->omit_metadata()) {
+      log_msg = fmt::format("[NOT IMPLEMENTED] Retrieving metadata for nearest neighbor vectors.");
+      spdlog::info(log_msg);
+      // TODO: Now actually retrieve metadata.
+    }
+
+    // Set nearest neighbor indices on response datum
+    else {
+      curr_quantizer->search(n, &data_vec[0], k, &distances[0], &labels[0]);
+
+      for (int l : labels) {
+        auto datum = p_response->add_rptd__datum();
+
+        std::string _id = fmt::format("{}", l);
+        datum->set_id(_id);
+      }
+    }
   }
+
+  // TODO: Implement construction of response for ntotal >= INDEX_SIZE_THRESHOLD case
+  // Not sure yet why this case was separated out above.
+
+  p_response->set_ntotal(n);
 
   //  try {
   //    curr_index->assign(n, &data_vec[0], &labels[0], k);
@@ -714,34 +765,6 @@ NNextServiceImpl::VectorSearch(grpc::ServerContext *p_context,
   //    std::clog << (p ? p.__cxa_exception_type()->name() : "null") <<
   //    std::endl;
   //  }
-
-  for (int l : labels) {
-    auto datum = p_response->add_rptd__datum();
-
-    std::string _id = fmt::format("{}", l);
-    datum->set_id(_id);
-  }
-
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < k; j++) {
-      std::cout << labels[i * k + j] << ",";
-    }
-    std::cout << std::endl;
-  }
-
-  p_response->set_ntotal(n);
-
-  if (!p_request->omit_vector()) {
-    log_msg = fmt::format("Extracting nearest vectors.");
-
-    spdlog::info(log_msg);
-  }
-
-  if (!p_request->omit_metadata()) {
-    log_msg = fmt::format("Retrieving metadata for nearest vectors.");
-
-    spdlog::info(log_msg);
-  }
 
   /*
    * Format a nice response message to return to the user.
