@@ -24,6 +24,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/fmt.h>
 
 // Internal Libraries
 #include "server.h"
@@ -31,7 +32,7 @@
 using grpc::Status;
 using nnext::NNext;
 
-void RunServer(argparse::ArgumentParser &opts) {
+void RunServer(argparse::ArgumentParser &opts, spdlog::logger &logger) {
   std::string host = opts.get("--host");
   std::string port = opts.get("--port");
   std::string data_dir = opts.get("--data-dir");
@@ -50,10 +51,10 @@ void RunServer(argparse::ArgumentParser &opts) {
     db_status = rocksdb::DB::Open(options, data_dir, &nnext_service._rocksdb);
 
     if (!db_status.ok()) {
-      spdlog::critical("RocksDB error {}", db_status.ToString());
+      logger.critical("RocksDB error {}", db_status.ToString());
       exit(1);
     } else {
-      spdlog::debug("Connected to RocksdDB. Data directory {}", data_dir);
+      logger.debug("Connected to RocksdDB. Data directory {}", data_dir);
     }
 
     /*
@@ -72,7 +73,7 @@ void RunServer(argparse::ArgumentParser &opts) {
 
     // Finally assemble the server.
     std::unique_ptr<grpc::Server> nnext_server(builder.BuildAndStart());
-  spdlog::info("🏁 Started NNext at ▸ {}", server_address);
+    logger.info("🏁 Started NNext at ▸ {}", server_address);
 
     // Wait for the server to shut down. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
@@ -110,6 +111,10 @@ int main(int argc, char *argv[]) {
       .help("Specifies the directory to use for data storage.")
       .default_value(std::string("/var/lib/nnext/data"));
 
+  opts.add_argument("--log-dir", "--log-dir", "-g")
+      .help("Specifies the directory to write logs to.")
+      .default_value(std::string("/var/log/nnext"));
+
   opts.add_argument("--index-type", "--index_type", "-I")
       .default_value("Flat")
       .action([](const std::string &value) {
@@ -118,7 +123,7 @@ int main(int argc, char *argv[]) {
         if (std::find(choices.begin(), choices.end(), value) != choices.end()) {
           return value;
         }
-        spdlog::warn("Unknown inde should appear in both console and file");
+        spdlog::warn("Unknown index should appear in both console and file");
         return std::string{"Flat"};
       });
 
@@ -141,11 +146,14 @@ int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::err);
   }
 
+  std::string log_dir = opts.get("--log-dir");
+  std::string log_file = fmt::format("{}/nnext.txt", log_dir);
+
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   console_sink->set_level(spdlog::level::info);
 
   auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-      "logs/nnext.txt", true);
+      log_dir, true);
   file_sink->set_level(spdlog::level::trace);
 
   spdlog::logger logger("multi_sink", {console_sink, file_sink});
@@ -159,7 +167,7 @@ int main(int argc, char *argv[]) {
                "like to participate"
                "\nin this anonymous program, by visiting the following URL:"
                "\nhttps://nnext.ai/telemetry");
-  RunServer(opts);
+  RunServer(opts, logger);
 
   return 0;
 }
