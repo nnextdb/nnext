@@ -273,13 +273,13 @@ grpc::Status NNextServiceImpl::CreateIndex(grpc::ServerContext *p_context,
    */
   faiss::IndexFlat quantizer(dims);
   const size_t nlist = 4; // Number of cluster centroids.
-  int m_pq = 128;
+  int m_pq = std::min(128, dims);
   int M = 16; // Number of neighbors used in the graph. A larger M is more
               // accurate but uses more memory
   std::vector<float> data_vec;
 
   /*
-   * Create the approximated index and the storage (quantizer)
+   * Create the approximated HNSW index and the storage (quantizer)
    */
   std::shared_ptr ptr__quantizer = std::make_shared<faiss::IndexFlat>(dims);
   std::shared_ptr curr_index = std::make_shared<faiss::IndexHNSW2Level>(
